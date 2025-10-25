@@ -1,0 +1,4 @@
+PROBLEM_FILE = /home/wzq/workspace/RACER-modified/src/swarm_exploration/utils/lkh_tsp_solver/resource/cover_1.tsp
+GAIN23 = NO
+OUTPUT_TOUR_FILE =/home/wzq/workspace/RACER-modified/src/swarm_exploration/utils/lkh_tsp_solver/resource/cover_1.tour
+RUNS = 1

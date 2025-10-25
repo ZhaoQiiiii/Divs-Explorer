@@ -1,0 +1,11 @@
+NAME : single.1472.tour
+COMMENT : Length = 1472
+COMMENT : Found by LKH [Keld Helsgaun] Mon Apr 21 16:12:31 2025
+TYPE : TOUR
+DIMENSION : 3
+TOUR_SECTION
+1
+2
+3
+-1
+EOF

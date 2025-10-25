@@ -1,0 +1,149 @@
+<launch>
+  <!-- Exploration Manager -->
+
+  <!-- User Define -->
+  <arg name="drone_num"       default="3"/> 
+  <arg name="divide_size"     default="5.0"/>
+  <arg name="odom_prefix"     default="/state_ukf/odom"/>
+
+  <!-- <arg name="sensing_horizon" default="5.0" if="$(arg use_depth)"/>
+  <arg name="sensing_horizon" default="7.0" unless="$(arg use_depth)"/>
+
+  <arg name="max_ray_length"  default="4.5" if="$(arg use_depth)"/>
+  <arg name="max_ray_length"  default="6.5" unless="$(arg use_depth)"/> -->
+
+  <arg name="sensing_horizon" default="5.0" if="$(arg is_drone)"/>
+  <arg name="sensing_horizon" default="7.0" unless="$(arg is_drone)"/>
+
+  <arg name="max_ray_length"  default="4.5" if="$(arg is_drone)"/>
+  <arg name="max_ray_length"  default="6.5" unless="$(arg is_drone)"/>
+
+  <arg name="max_vel"  default="2.0"  if="$(arg is_drone)"/>
+  <arg name="max_acc"  default="3.0"  if="$(arg is_drone)"/>
+
+  <arg name="max_vel"  default="1.2"  unless="$(arg is_drone)"/>
+  <arg name="max_acc"  default="2.0"  unless="$(arg is_drone)"/>
+
+
+  <!-- Fixed -->
+  <arg name="is_drone"    default="true"/>
+  <arg name="use_depth"   default="true"/>
+  <arg name="drone_id"    default="1"/>
+  <arg name="simulation"  default="true"/>
+
+  <arg name="init_x"      default="0"/>
+  <arg name="init_y"      default="0"/>
+  <arg name="init_z"      default="1"/>
+
+  <arg name="map_size_x"  default="50"/>
+  <arg name="map_size_y"  default="50"/>
+  <arg name="map_size_z"  default="10"/>
+
+  <arg name="box_min_x"   default="-8"/>
+  <arg name="box_min_y"   default="-15"/>
+  <arg name="box_min_z"   default="0"/>
+  <arg name="box_max_x"   default="8"/>
+  <arg name="box_max_y"   default="15"/>
+  <arg name="box_max_z"   default="2"/>
+
+  <arg name="odometry_topic"    default="$(arg odom_prefix)_$(arg drone_id)"/>
+  <arg name="sensor_pose_topic" default="/pcl_render_node/sensor_pose_$(arg drone_id)"/>
+  <arg name="depth_topic"       default="/pcl_render_node/depth_$(arg drone_id)"/>
+  <arg name="cloud_topic"       default="/pcl_render_node/cloud_$(arg drone_id)"/> 
+  
+  <arg name="expl_task"         default="0"/>
+  <arg name="expl_method"       default="0"/> 
+  <arg name="show_ground"       default="true"/>
+  <arg name="complete_expl"     default="true"/>
+  <arg name="coverage_rate_thr" default="0.5"/> 
+  
+
+
+  <!-- Exploration Planner -->
+  <include file="$(find exploration_manager)/launch/single_drone_planner.xml">
+    <arg name="expl_task"   value="$(arg expl_task)"/> 
+    <arg name="expl_method" value="$(arg expl_method)"/> 
+    <arg name="is_drone"    value="$(arg is_drone)"/> 
+    <arg name="use_depth"   value="$(arg use_depth)"/> 
+    <arg name="drone_id"    value="$(arg drone_id)"/>
+    <arg name="drone_num"   value="$(arg drone_num)"/>
+
+    <arg name="map_size_x"  value="$(arg map_size_x)"/>
+    <arg name="map_size_y"  value="$(arg map_size_y)"/>
+    <arg name="map_size_z"  value="$(arg map_size_z)"/>
+
+    <arg name="box_min_x" value="$(arg box_min_x)"/>
+    <arg name="box_min_y" value="$(arg box_min_y)"/>
+    <arg name="box_min_z" value="$(arg box_min_z)"/>
+    <arg name="box_max_x" value="$(arg box_max_x)"/>
+    <arg name="box_max_y" value="$(arg box_max_y)"/>
+    <arg name="box_max_z" value="$(arg box_max_z)"/>
+
+    <arg name="odometry_topic"    value="$(arg odometry_topic)"/>
+    <arg name="sensor_pose_topic" value="$(arg sensor_pose_topic)"/> 
+    <arg name="depth_topic" value="$(arg depth_topic)"/> 
+    <arg name="cloud_topic" value="$(arg cloud_topic)"/>
+
+    <arg name="max_vel" value="$(arg max_vel)"/>
+    <arg name="max_acc" value="$(arg max_acc)"/>
+
+    <arg name="simulation"     value="$(arg simulation)"/>
+    <arg name="divide_size"    value="$(arg divide_size)"/>
+    <arg name="show_ground"    value="$(arg show_ground)"/>
+    <arg name="complete_expl"  value="$(arg complete_expl)"/>
+    <arg name="max_ray_length" value="$(arg max_ray_length)"/>
+    <arg name="coverage_rate_thr" value="$(arg coverage_rate_thr)"/>
+  </include>
+
+
+  <!-- Trajectory Server -->
+  <node pkg="plan_manage" name="traj_server_$(arg drone_id)" type="traj_server" output="screen">
+    <param name="is_drone"   value="$(arg is_drone)"/>
+    <param name="use_depth"  value="$(arg use_depth)"/>
+    <param name="drone_id"   value="$(arg drone_id)"/>
+    <param name="drone_num"  value="$(arg drone_num)"/>
+    <param name="max_ray_length" value="$(arg max_ray_length)"/>
+
+    <param name="traj_server/time_forward" value="1.5"  type="double"/>
+    <param name="traj_server/pub_traj_id"  value="4"    type="int"/>
+    
+    <param name="perception_utils/top_angle"   value="0.56125" type="double"/>
+    <param name="perception_utils/left_angle"  value="0.69222" type="double"/>
+    <param name="perception_utils/right_angle" value="0.68901" type="double"/>
+    <param name="perception_utils/max_dist" value="4.5" type="double"/>
+    <param name="perception_utils/vis_dist" value="1.0" type="double"/>
+
+    <remap from="/planning/position_cmd" to="/planning/pos_cmd_$(arg drone_id)"/>
+    <remap from="/planning/bspline" to="/planning/bspline_$(arg drone_id)"/>
+    <remap from="/planning/replan" to="/planning/replan_$(arg drone_id)"/>
+    <remap from="/planning/new" to="/planning/new_$(arg drone_id)"/>
+
+    <remap from="/planning_vis/sensor_fov" to="/planning_vis/sensor_fov_$(arg drone_id)"/>
+    <remap from="/planning_vis/executed_traj" to="/planning_vis/executed_traj_$(arg drone_id)"/>
+  </node>
+
+
+  <!-- Simulator -->
+  <include file="$(find exploration_manager)/launch/simulator_light.xml" if="$(arg simulation)">
+    <arg name="is_drone"  value="$(arg is_drone)"/> 
+    <arg name="use_depth" value="$(arg use_depth)"/>
+    <arg name="drone_id"  value="$(arg drone_id)"/>
+    <arg name="drone_num" value="$(arg drone_num)"/>
+
+    <arg name="init_x" value="$(arg init_x)"/>
+    <arg name="init_y" value="$(arg init_y)"/>
+    <arg name="init_z" value="$(arg init_z)"/> 
+
+    <arg name="odometry_topic" value="$(arg odometry_topic)"/>
+    <arg name="sensor_pose_topic" value="$(arg sensor_pose_topic)"/>
+    <arg name="depth_topic" value="$(arg depth_topic)"/>
+    <arg name="cloud_topic" value="$(arg cloud_topic)"/>
+    <arg name="sensing_horizon" value="$(arg sensing_horizon)"/>
+  </include>
+
+  <!-- LCM Communication -->
+  <!-- <include file="$(find inf_uwb_ros)/launch/uwb_node_sim.launch" if="$(arg simulation)">
+    <arg name="self_id" value="$(arg drone_id)"/>
+  </include> -->
+
+</launch>

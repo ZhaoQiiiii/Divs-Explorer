@@ -1,0 +1,68 @@
+<launch>
+  <!-- Light Weight Simulator -->
+  
+  <!-- The simulator receives poscmd from the planner, generates odometry of the drone and visualizes it -->
+
+  <arg name="is_drone"/> 
+  <arg name="use_depth"/> 
+  <arg name="drone_id"/>
+  <arg name="drone_num"/>
+
+  <arg name="init_x"/>
+  <arg name="init_y"/>
+  <arg name="init_z"/> 
+
+  <arg name="odometry_topic"/>
+  <arg name="sensor_pose_topic"/>
+  <arg name="depth_topic"/>
+  <arg name="cloud_topic"/>
+
+  <arg name="sensing_horizon"/>
+
+
+  <!-- Physical Simulator -->
+  <node pkg="poscmd_2_odom" name="poscmd_2_odom_$(arg drone_id)" type="poscmd_2_odom" output="screen">
+    <!-- SO3 Simulator, Disturbance Generator and Controller is replaced by poscmd_2_odom -->
+    <param name="is_drone"       value="$(arg is_drone)"/>
+    <param name="drone_id"       value="$(arg drone_id)"/>
+    
+    <param name="init_x" value="$(arg init_x)"/>
+    <param name="init_y" value="$(arg init_y)"/>
+    <param name="init_z" value="$(arg init_z)"/>
+
+    <remap from="~command" to="/planning/pos_cmd_$(arg drone_id)"/>
+    <remap from="~odometry" to="$(arg odometry_topic)"/>
+  </node>
+    
+  
+  <!-- Odom Vis -->                                                                                                                                                                                                                                                                                      
+  <node pkg="odom_visualization" name="odom_visualization_$(arg drone_id)" type="odom_visualization" output="screen">
+    <param name="is_drone"  value="$(arg is_drone)"/>
+    <param name="drone_id"  value="$(arg drone_id)"/>    
+    <param name="drone_num" value="$(arg drone_num)"/>           
+
+    <remap from="~odom"  to="$(arg odometry_topic)"/>
+    <remap from="~robot" to="/odom_visualization/robot_$(arg drone_id)"/>
+  </node>
+
+
+  <!-- Local Sensing -->
+  <node pkg="local_sensing_node" type="pcl_render_node" name="pcl_render_node_$(arg drone_id)" output="screen">
+    <rosparam command="load" file="$(find local_sensing_node)/params/camera.yaml"/>
+    <rosparam command="load" file="$(find local_sensing_node)/params/lidar.yaml"/>
+
+    <param name="is_drone"        value="$(arg is_drone)"/>
+    <param name="use_depth"       value="$(arg use_depth)"/>
+    <param name="sensing_rate"    value="10.0"/>
+    <param name="estimation_rate" value="10.0"/>
+    <param name="sensing_horizon" value="$(arg sensing_horizon)"/>
+
+    <remap from="~global_map" to="/map_generator/global_cloud"/>
+    <remap from="~odometry"   to="$(arg odometry_topic)"/>
+    <remap from="/pcl_render_node/odom" to="/pcl_render_node/odom_$(arg drone_id)"/>
+    <remap from="/pcl_render_node/sensor_pose" to="$(arg sensor_pose_topic)"/>
+    <remap from="/pcl_render_node/depth" to="$(arg depth_topic)"/>
+    <remap from="/pcl_render_node/cloud" to="$(arg cloud_topic)"/>
+  </node>
+
+</launch>

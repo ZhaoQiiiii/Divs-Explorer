@@ -1,0 +1,113 @@
+<launch>
+  <!-- Simulation Launch File -->
+
+  <arg name="expl_task" value="0"/> <!-- 0-单机完整探索, 1-单机部分探索, 2-空地协同探索 -->
+
+  <!-- expl_task = 0 -->
+  <arg name="expl_method" value="0" if="$(eval expl_task == 0)"/> <!-- 0-Proposed, 1-Classic, 2-FUEL, 3-RACER -->
+  <arg name="expl_method" value="0" unless="$(eval expl_task == 0)"/> 
+  
+  <!-- expl_task = 1 or 2 -->
+  <arg name="coverage_rate_thr"  value="0.50"/>  <!-- 0.25 / 0.50 / 0.75 -->
+
+  <!-- Show the Div status -->
+  <arg name="show_ground" value="true"  if="$(eval expl_method == 0)"/> <!-- Change this for Proposed -->
+  <arg name="show_ground" value="true"  unless="$(eval expl_method == 0)"/>
+
+
+  <!-- office  16 * 30 * 2 --> 
+  <arg name="map_name"   value="office.pcd"/>
+  <arg name="box_min_x"  value="-8"/>
+  <arg name="box_min_y"  value="-15"/>
+  <arg name="box_max_x"  value="8"/>
+  <arg name="box_max_y"  value="15"/>
+
+
+  <!-- office2  20 * 20 * 2 -->
+  <!-- <arg name="map_name"   value="office2.pcd"/>
+  <arg name="box_min_x"  value="-10"/>
+  <arg name="box_min_y"  value="-10"/>
+  <arg name="box_max_x"  value="10"/>
+  <arg name="box_max_y"  value="10"/> -->
+
+
+  <!-- office3  20 * 30 * 2 --> 
+  <!-- <arg name="map_name"   value="office3.pcd"/>
+  <arg name="box_min_x"  value="-10"/>
+  <arg name="box_min_y"  value="-15"/>
+  <arg name="box_max_x"  value="10"/>
+  <arg name="box_max_y"  value="15"/> -->
+
+
+  <!-- pillar  14 * 30 * 2 --> 
+  <!-- <arg name="map_name"   value="pillar.pcd"/>
+  <arg name="box_min_x"  value="-7"/>
+  <arg name="box_min_y"  value="-15"/>
+  <arg name="box_max_x"  value="7"/>
+  <arg name="box_max_y"  value="15"/> -->
+
+
+  <arg name="box_min_z"  value="0"/>
+  <arg name="box_max_z"  value="2"/>
+
+
+  <!-- Map Generator -->
+  <node pkg ="map_generator" name ="map_pub" type ="map_pub" output ="screen"> 
+    <param name="map_path"    value="$(find map_generator)/resource/$(arg map_name)"/>
+    <param name="box_min_x"   value="$(arg box_min_x)"/>
+    <param name="box_min_y"   value="$(arg box_min_y)"/>
+    <param name="box_max_x"   value="$(arg box_max_x)"/>
+    <param name="box_max_y"   value="$(arg box_max_y)"/>
+    <param name="box_min_z"   value="$(arg box_min_z)"/>
+    <param name="box_max_z"   value="$(arg box_max_z)"/>
+  </node>
+
+
+  <!-- Drone_1 -->
+  <include file="$(find exploration_manager)/launch/single_drone_exploration.xml">
+    <arg name="is_drone"          value="true"/>
+    <arg name="use_depth"         value="true"/>
+    <arg name="drone_id"          value="1"/>
+    <arg name="expl_task"         value="$(arg expl_task)"/>
+    <arg name="expl_method"       value="$(arg expl_method)"/>
+    <arg name="show_ground"       value="$(arg show_ground)"/>
+    <arg name="complete_expl"     value="true"  if="$(eval expl_task == 0)"/>
+    <arg name="complete_expl"     value="false" unless="$(eval expl_task == 0)"/>
+    <arg name="coverage_rate_thr" value="$(arg coverage_rate_thr)"/>
+
+    <arg name="init_x"            value="0"/>
+    <arg name="init_y"            value="0"/>
+    <arg name="init_z"            value="1"/> 
+    <arg name="box_min_x"         value="$(arg box_min_x)"/>
+    <arg name="box_min_y"         value="$(arg box_min_y)"/>
+    <arg name="box_min_z"         value="$(arg box_min_z)"/>
+    <arg name="box_max_x"         value="$(arg box_max_x)"/>
+    <arg name="box_max_y"         value="$(arg box_max_y)"/>
+    <arg name="box_max_z"         value="$(arg box_max_z)"/>
+  </include>
+
+
+  <!-- Ground_2 -->
+  <group if="$(eval expl_task == 2)">
+    <include file="$(find exploration_manager)/launch/single_drone_exploration.xml">
+      <arg name="is_drone"          value="false"/>
+      <arg name="use_depth"         value="true"/>
+      <arg name="drone_id"          value="2"/>
+      <arg name="expl_task"         value="$(arg expl_task)"/>
+      <arg name="expl_method"       value="$(arg expl_method)"/>
+      <arg name="show_ground"       value="$(arg show_ground)"/>
+      <arg name="coverage_rate_thr" value="$(arg coverage_rate_thr)"/>
+
+      <arg name="init_x"            value="0"/>
+      <arg name="init_y"            value="0"/>
+      <arg name="init_z"            value="0.5"/>
+      <arg name="box_min_x"         value="$(arg box_min_x)"/>
+      <arg name="box_min_y"         value="$(arg box_min_y)"/>
+      <arg name="box_min_z"         value="$(arg box_min_z)"/>
+      <arg name="box_max_x"         value="$(arg box_max_x)"/>
+      <arg name="box_max_y"         value="$(arg box_max_y)"/>
+      <arg name="box_max_z"         value="$(arg box_max_z)"/>
+    </include>
+  </group>
+
+</launch>
