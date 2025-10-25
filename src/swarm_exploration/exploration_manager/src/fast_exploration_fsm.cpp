@@ -108,7 +108,6 @@ void FastExplorationFSM::initialize(ros::NodeHandle &nh) {
   }
 }
 
-// Exploration Planner
 int FastExplorationFSM::callExplorationPlanner() {
 
   ros::Time time_r = ros::Time::now() + ros::Duration(fp_->replan_time_);
@@ -198,7 +197,6 @@ int FastExplorationFSM::callExplorationPlanner() {
 // Callbacks
 //
 
-// Timer 0.01s
 void FastExplorationFSM::FSMCallback(const ros::TimerEvent &e) {
 
   // ROS_INFO_STREAM_THROTTLE(3.0, "[FSM] Drone " << getId() << ": State: " << fd_->state_str_[int(state_)]);
@@ -377,7 +375,6 @@ void FastExplorationFSM::FSMCallback(const ros::TimerEvent &e) {
   }
 }
 
-// Timer 0.05s
 void FastExplorationFSM::safetyCallback(const ros::TimerEvent &e) {
 
   // Check safety and trigger replan if necessary
@@ -395,7 +392,6 @@ void FastExplorationFSM::safetyCallback(const ros::TimerEvent &e) {
   }
 }
 
-// Timer 0.5s - Visulize in WAIT_TRIGGER and FINISH
 void FastExplorationFSM::terminalCallback(const ros::TimerEvent &e) {
 
   // Visulize in WAIT_TRIGGER and FINISH
@@ -543,7 +539,6 @@ void FastExplorationFSM::terminalCallback(const ros::TimerEvent &e) {
   }
 }
 
-// Sub "/move_base_simple/goal"
 void FastExplorationFSM::triggerCallback(const geometry_msgs::PoseStampedConstPtr &msg) {
 
   if (state_ != WAIT_TRIGGER)
@@ -563,7 +558,6 @@ void FastExplorationFSM::triggerCallback(const geometry_msgs::PoseStampedConstPt
     transiteState(FINISH, "triggerCallback");
 }
 
-// Sub "/odom_world"
 void FastExplorationFSM::odometryCallback(const nav_msgs::OdometryConstPtr &msg) {
 
   // position
@@ -591,7 +585,6 @@ void FastExplorationFSM::odometryCallback(const nav_msgs::OdometryConstPtr &msg)
   }
 }
 
-// Timer 0.1s (For Ground)
 void FastExplorationFSM::waitDroneCallback(const ros::TimerEvent &e) {
   if (state_ != WAIT_DRONE)
     return;
@@ -604,7 +597,6 @@ void FastExplorationFSM::waitDroneCallback(const ros::TimerEvent &e) {
   }
 }
 
-// Sub "/state_ukf/odom_1" (For Ground)
 void FastExplorationFSM::droneOdomCallback(const nav_msgs::OdometryConstPtr &msg) {
   // position
   fd_->drone_pos_(0) = msg->pose.pose.position.x;
@@ -624,8 +616,9 @@ void FastExplorationFSM::droneOdomCallback(const nav_msgs::OdometryConstPtr &msg
     fd_->have_drone_odom_ = true;
 }
 
-// Sub "/exploration/next_cor_1" (For Ground)
 void FastExplorationFSM::nextCorCallback(const NextCorPtr &msg) {
+  // Sub "/exploration/next_cor_1" (For Ground)
+
   if (fd_->have_next_cor_)
     return;
 
@@ -635,8 +628,9 @@ void FastExplorationFSM::nextCorCallback(const NextCorPtr &msg) {
   fd_->get_next_cor_time_ = ros::Time::now();
 }
 
-// Sub "/exploration/expl_replan_1" (For Ground)
 void FastExplorationFSM::explReplanCallback(const std_msgs::Empty &msg) {
+  // Sub "/exploration/expl_replan_1" (For Ground)
+
   if (state_ == WAIT_DRONE)
     return;
 
@@ -650,7 +644,6 @@ void FastExplorationFSM::explReplanCallback(const std_msgs::Empty &msg) {
 // Helper
 //
 
-// Transite the FSM State
 void FastExplorationFSM::transiteState(EXPL_STATE new_state, string pos_call) {
   int pre_s = int(state_);
   state_ = new_state;
@@ -660,8 +653,8 @@ void FastExplorationFSM::transiteState(EXPL_STATE new_state, string pos_call) {
   //                 << " from " + fd_->state_str_[pre_s] + " to " + fd_->state_str_[int(new_state)]);
 }
 
-// Visulize in PUB_TRAJ
 void FastExplorationFSM::visualize() {
+  // Visulize in PUB_TRAJ
 
   auto local_traj = &planner_manager_->local_traj_;
   auto plan_data = &planner_manager_->plan_data_;
@@ -810,7 +803,6 @@ void FastExplorationFSM::visualize() {
   }
 }
 
-// Check the Explore Replan
 bool FastExplorationFSM::checkExploreReplan(const shared_ptr<ExplData> &ed_ptr, const DivisionParam::Ptr &params,
                                             bool is_drone) {
 
@@ -842,12 +834,16 @@ bool FastExplorationFSM::checkExploreReplan(const shared_ptr<ExplData> &ed_ptr, 
   }
 }
 
-// Check the Ground if start explore
 bool FastExplorationFSM::checkGroundExplore() {
+
+  // Wait for Drone Odom and IDs of Next Corner Divs
   if (!fd_->have_drone_odom_ || !fd_->have_next_cor_)
-    return false; // Wait for Drone Odom and IDs of Next Corner Divs
+    return false;
+
+  // Delay after get the IDs of Next Corner Divs
   if ((ros::Time::now() - fd_->get_next_cor_time_).toSec() < 5.0)
-    return false; // Delay after get the IDs of Next Corner Divs
+    return false;
+
   return true;
 }
 
@@ -855,8 +851,9 @@ bool FastExplorationFSM::checkGroundExplore() {
 // RACER
 //
 
-// Timer 0.04s + Pub "/swarm_expl/drone_state"
 void FastExplorationFSM::droneStateTimerCallback(const ros::TimerEvent &e) {
+
+  // Timer 0.04s + Pub "/swarm_expl/drone_state"
 
   // Broadcast drone own state periodically
 
@@ -892,8 +889,9 @@ void FastExplorationFSM::droneStateTimerCallback(const ros::TimerEvent &e) {
   drone_state_pub_.publish(msg);
 }
 
-// Sub "/swarm_expl/drone_state"
 void FastExplorationFSM::droneStateMsgCallback(const exploration_manager::DroneStateConstPtr &msg) {
+
+  // Sub "/swarm_expl/drone_state"
 
   // Update other drones' states from msg
 
@@ -924,8 +922,9 @@ void FastExplorationFSM::droneStateMsgCallback(const exploration_manager::DroneS
   // std::endl; std::cout << drone_state.pos_.transpose() << std::endl;
 }
 
-// Timer 0.05s + Pub "/swarm_expl/pair_opt"
 void FastExplorationFSM::optTimerCallback(const ros::TimerEvent &e) {
+
+  // Timer 0.05s + Pub "/swarm_expl/pair_opt"
 
   if (state_ == INIT)
     return;
@@ -1084,9 +1083,9 @@ void FastExplorationFSM::optTimerCallback(const ros::TimerEvent &e) {
   state1.recent_attempt_time_ = tn;
 }
 
-// Sub "/swarm_expl/pair_opt" + Pub "/swarm_expl/pair_opt_res"
 void FastExplorationFSM::optMsgCallback(const exploration_manager::PairOptConstPtr &msg) {
-  //
+
+  // Sub "/swarm_expl/pair_opt" + Pub "/swarm_expl/pair_opt_res"
 
   // Receive msg from other drones to ego drone
   if (msg->from_drone_id == getId() || msg->to_drone_id != getId())
@@ -1147,8 +1146,10 @@ void FastExplorationFSM::optMsgCallback(const exploration_manager::PairOptConstP
     opt_res_pub_.publish(response);
 }
 
-// Sub "/swarm_expl/pair_opt_res"
 void FastExplorationFSM::optResMsgCallback(const exploration_manager::PairOptResponseConstPtr &msg) {
+
+  // Sub "/swarm_expl/pair_opt_res"
+
   if (msg->from_drone_id == getId() || msg->to_drone_id != getId())
     return;
 
@@ -1181,8 +1182,9 @@ void FastExplorationFSM::optResMsgCallback(const exploration_manager::PairOptRes
   }
 }
 
-// Timer 0.1s + Pub "/planning/swarm_traj"
 void FastExplorationFSM::swarmTrajTimerCallback(const ros::TimerEvent &e) {
+
+  // Timer 0.1s + Pub "/planning/swarm_traj"
 
   // Broadcast newest traj of this drone to others
 
@@ -1220,8 +1222,10 @@ void FastExplorationFSM::swarmTrajTimerCallback(const ros::TimerEvent &e) {
   }
 }
 
-// Sub "/planning/swarm_traj"
 void FastExplorationFSM::swarmTrajCallback(const bspline::BsplineConstPtr &msg) {
+
+  // Sub "/planning/swarm_traj"
+
   // Get newest trajs from other drones, for inter-drone collision avoidance
   auto &sdat = planner_manager_->swarm_traj_data_;
 
@@ -1301,4 +1305,4 @@ void FastExplorationFSM::findUnallocated(const vector<int> &actives, vector<int>
   }
 }
 
-}
+} // namespace fast_planner
