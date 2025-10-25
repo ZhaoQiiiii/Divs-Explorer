@@ -21,7 +21,6 @@ namespace fast_planner {
 
 void FastExplorationFSM::initialize(ros::NodeHandle &nh) {
   // Params
-  
   fp_.reset(new FSMParam);
   fd_.reset(new FSMData);
   nh.param("fsm/thresh_replan1", fp_->replan_thresh1_, -1.0);
