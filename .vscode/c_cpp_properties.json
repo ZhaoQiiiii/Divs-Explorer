@@ -1,0 +1,42 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "${default}",
+        "limitSymbolsToIncludedHeaders": true
+      },
+      "includePath": [
+        "/usr/include/**",
+        "/opt/ros/noetic/include/**",
+        "${workspaceFolder}/devel/include/**",
+        "${workspaceFolder}/src/swarm_exploration/active_perception/include/**",
+        "${workspaceFolder}/src/swarm_exploration/bspline/include/**",
+        "${workspaceFolder}/src/swarm_exploration/bspline_opt/include/**",
+        "${workspaceFolder}/src/swarm_exploration/exploration_manager/include/**",
+        "${workspaceFolder}/src/swarm_exploration/utils/lkh_mtsp_solver/include/**",
+        "${workspaceFolder}/src/swarm_exploration/utils/lkh_tsp_solver/include/**",
+        "${workspaceFolder}/src/swarm_exploration/traj_utils/include/**",
+        "${workspaceFolder}/src/swarm_exploration/path_searching/include/**",
+        "${workspaceFolder}/src/swarm_exploration/plan_env/include/**",
+        "${workspaceFolder}/src/swarm_exploration/plan_manage/include/**",
+        "${workspaceFolder}/src/swarm_exploration/poly_traj/include/**",
+        "${workspaceFolder}/src/uav_simulator/local_sensing/include/**",
+        "${workspaceFolder}/src/uav_simulator/Utils/multi_map_server/include/**",
+        "${workspaceFolder}/src/uav_simulator/Utils/pose_utils/include/**",
+        "${workspaceFolder}/src/uav_simulator/Utils/quadrotor_msgs/include/**",
+        "${workspaceFolder}/src/uav_simulator/so3_control/include/**",
+        "${workspaceFolder}/src/uav_simulator/so3_disturbance_generator/include/**",
+        "${workspaceFolder}/src/uav_simulator/so3_quadrotor_simulator/include/**",
+        "${workspaceFolder}/src/uav_simulator/Utils/uav_utils/include/**"
+      ],
+      "name": "ROS",
+      "cStandard": "c17",
+      "cppStandard": "c++17",
+      "intelliSenseMode": "linux-gcc-x64",
+      "compilerPath": "/usr/bin/g++",
+      "compileCommands": "${workspaceFolder}/build/compile_commands.json",
+      "configurationProvider": "ms-vscode.cmake-tools"
+    }
+  ],
+  "version": 4
+}
